@@ -52,7 +52,8 @@ spec:
           periodSeconds: 5
         livenessProbe:
           httpGet:
-            path: /up
+            path: /up  # or another valid endpoint like "/"
             port: 3000
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 10
+        

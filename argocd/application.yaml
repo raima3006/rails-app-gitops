@@ -2,18 +2,32 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: rails-app
+  namespace: argocd
 spec:
   destination:
-    server: https://kubernetes.default.svc
+    # CHOOSE ONLY ONE OF THESE - REMOVE THE OTHER
+    server: https://kubernetes.default.svc  # Recommended for most cases
+    # name: in-cluster                     # Alternative if you prefer
     namespace: default
   project: default
   source:
-    repoURL: https://github.com/your-username/rails-app-gitops.git
+    repoURL: https://github.com/raima3006/rails-app-gitops.git
     path: kubernetes/
     targetRevision: HEAD
+    directory:
+      recurse: true
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
     syncOptions:
     - CreateNamespace=true
+    - PruneLast=true
+    - ApplyOutOfSyncOnly=true
+  ignoreDifferences:
+  - group: networking.k8s.io
+    kind: Ingress
+    jsonPointers:
+    - /status
+    - /metadata/annotations

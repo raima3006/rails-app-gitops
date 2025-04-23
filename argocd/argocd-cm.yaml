@@ -8,6 +8,6 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   repositories: |
-    - url: https://github.com/your-username/rails-app-gitops.git
+    - url: https://github.com/raima3006/rails-app-gitops.git
       type: git
       name: rails-app-repo

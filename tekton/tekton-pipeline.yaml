@@ -1,40 +1,35 @@
+# tekton-pipeline.yaml
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: rails-app-pipeline
 spec:
   params:
-    - name: repo-url
-      type: string
-      description: The git repo URL to clone from
     - name: image-name
       type: string
-      description: The name of the image to build
-    - name: dockerhub-username
-      type: string
-      description: Docker Hub username
+      default: "rails-app"
   workspaces:
-    - name: shared-workspace
+    - name: source-repo
+    - name: dockerconfig
   tasks:
     - name: fetch-source
       taskRef:
         name: git-clone
       workspaces:
         - name: output
-          workspace: shared-workspace
+          workspace: source-repo
       params:
         - name: url
-          value: "$(params.repo-url)"
-        - name: deleteExisting
-          value: "true"
+          value: "https://github.com/raima3006/rails-app-gitops.git"
     - name: build-and-push
       taskRef:
         name: kaniko
-      runAfter:
-        - fetch-source
+      runAfter: ["fetch-source"]
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source-repo
+        - name: dockerconfig
+          workspace: dockerconfig
       params:
         - name: IMAGE
-          value: "$(params.dockerhub-username)/$(params.image-name):latest"
+          value: "raima01/$(params.image-name):latest"

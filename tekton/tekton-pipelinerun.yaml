@@ -1,3 +1,4 @@
+# tekton-pipelinerun.yaml
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
@@ -5,19 +6,20 @@ metadata:
 spec:
   pipelineRef:
     name: rails-app-pipeline
-  params:
-    - name: repo-url
-      value: "https://github.com/your-username/rails-app.git"
-    - name: image-name
-      value: "rails-app"
-    - name: dockerhub-username
-      value: "your-dockerhub-username"
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
   workspaces:
-    - name: shared-workspace
+    - name: source-repo
       volumeClaimTemplate:
         spec:
-          accessModes:
-            - ReadWriteOnce
+          accessModes: ["ReadWriteOnce"]
           resources:
             requests:
               storage: 1Gi
+    - name: dockerconfig
+      secret:
+        secretName: dockerhub-creds
+        items:
+          - key: .dockerconfigjson
+            path: config.json
