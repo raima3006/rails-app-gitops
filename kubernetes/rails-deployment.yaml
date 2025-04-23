@@ -1,0 +1,58 @@
+# rails-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rails-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rails-app
+  template:
+    metadata:
+      labels:
+        app: rails-app
+    spec:
+      containers:
+      - name: rails-app
+        image: raima01/rails-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          value: postgres://postgres:password@postgres:5432/rails_app_production
+        - name: RAILS_ENV
+          value: production
+        - name: RAILS_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rails-secrets
+              key: master-key
+        # Separate initialization and server commands
+        command: ["sh", "-c"]
+        args:
+          - |
+            echo "Running database preparation..."
+            rails db:prepare || exit 1
+            echo "Starting Rails server..."
+            exec rails server -b 0.0.0.0
+        # Add health checks
+        startupProbe:
+          httpGet:
+            path: /up
+            port: 3000
+          failureThreshold: 30
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /up
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /up
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 10

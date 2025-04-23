@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: rails-app-pipelinerun-
+spec:
+  pipelineRef:
+    name: rails-app-pipeline
+  params:
+    - name: repo-url
+      value: "https://github.com/your-username/rails-app.git"
+    - name: image-name
+      value: "rails-app"
+    - name: dockerhub-username
+      value: "your-dockerhub-username"
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
